@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Security - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .alert-attempt {
+            border-radius: 12px;
+            font-size: 0.92rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .attempt-dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .attempt-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+        }
+        .attempt-dot.used {
+            background: #ff4d4d;
+        }
+        .shake {
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25%       { transform: translateX(-6px); }
+            75%       { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div id="nav">
+        {% include 'navbar.html' %}
+    </div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="glass-card {% if message %}shake{% endif %}">
+                    <div class="glass-header text-center pt-4">
+                        <h2><i class="bi bi-shield-lock me-2"></i>Login</h2>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <!-- ── Alert Banner ── -->
+                        {% if message %}
+                            {% if warning_level == 'danger' %}
+                            <div class="alert alert-danger alert-attempt" role="alert">
+                                <i class="bi bi-x-octagon-fill fs-5 mt-1"></i>
+                                <div>
+                                    <strong>Account Locked</strong><br>
+                                    {{ message }}
+                                </div>
+                            </div>
+                            {% elif warning_level == 'warning' %}
+                            <div class="alert alert-warning alert-attempt" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill fs-5 mt-1"></i>
+                                <div>
+                                    <strong>Last Warning!</strong><br>
+                                    {{ message }}
+                                    <div class="attempt-dots mt-1">
+                                        <span class="attempt-dot used"></span>
+                                        <span class="attempt-dot used"></span>
+                                        <span class="attempt-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info alert-attempt" role="alert">
+                                <i class="bi bi-info-circle-fill fs-5 mt-1"></i>
+                                <div>
+                                    {{ message }}
+                                    {% if attempts_left == 2 %}
+                                    <div class="attempt-dots mt-1">
+                                        <span class="attempt-dot used"></span>
+                                        <span class="attempt-dot"></span>
+                                        <span class="attempt-dot"></span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <!-- Flash messages (e.g. "Login successful") -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, msg in messages %}
+                                <div class="alert alert-{{ category }} py-2" role="alert">{{ msg }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="/userlogin">
+                            <div class="mb-4">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" id="username" name="name" class="form-control" placeholder="Enter your username" required autocomplete="username">
+                            </div>
+                            <div class="mb-4">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+                            </div>
+                            <div class="d-grid mt-4">
+                                <button type="submit" id="login-btn" class="btn btn-primary">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="text-center pb-4">
+                        <p style="color: var(--text-muted);">Don't have an account? <a href="/usersignup" class="text-primary text-decoration-none fw-bold">Sign Up</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

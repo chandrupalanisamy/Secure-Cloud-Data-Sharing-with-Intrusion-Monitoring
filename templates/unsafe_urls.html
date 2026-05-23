@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsafe URLs</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="images/image1.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #dc3545;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) { background-color: #f2f2f2; color: black; }
+        tr:nth-child(odd) { background-color: #ffffff; color: black; }
+        tr:hover { background-color: #f9f9f9; cursor: pointer; }
+
+        .container {
+            margin-top: 50px;
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        /* 🔴 FIX FOR DEFACEMENT COLOR */
+        .bg-purple {
+            background-color: #6f42c1;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div id="nav">
+        {% include 'navbar.html' %}
+    </div>
+
+    <!-- Unsafe URLs Table -->
+    <div class="container">
+        <h1>⚠️ Unsafe URL </h1>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>URL</th>
+                    <th>Threat Type</th>
+                    <th>Sender</th>
+                    <th>Receiver</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if data %}
+                    {% for row in data %}
+                    <tr>
+                        <td style="word-break: break-all;">{{ row.url }}</td>
+                        <td>
+                            <span class="badge
+                                {% if row.prediction == 'malware' %} bg-danger
+                                {% elif row.prediction == 'phishing' %} bg-warning text-dark
+                                {% elif row.prediction == 'defacement' %} bg-purple
+                                {% else %} bg-secondary {% endif %}">
+                                {{ row.prediction.upper() }}
+                            </span>
+                        </td>
+                        <td>{{ row.sender }}</td>
+                        <td>{{ row.receiver }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            No unsafe URLs detected.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

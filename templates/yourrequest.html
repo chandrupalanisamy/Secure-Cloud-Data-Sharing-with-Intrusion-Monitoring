@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Requests</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark glass-nav">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Data Security</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('downloads_list') }}">Downloads</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('intrusions_list') }}">Intrusions</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('get_requests') }}">Manage Requests</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container glass-container">
+    <h1 class="glass-header text-center">Your Requests</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mt-2" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Owner</th>
+                    <th>Status</th>
+                    <th>Enter Key / Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if my_requests %}
+                    {% for req in my_requests %}
+                        <tr>
+                            <td>{{ req.filename }}</td>
+                            <td>{{ req.owner_name }}</td>
+                            <!-- Status Column — 3-Step Approval Chain Badge Logic -->
+                            <td>
+                                {% if req.status == 'denied' %}
+                                    <!-- ❌ Request was denied at any stage -->
+                                    <span class="badge bg-danger">❌ Denied</span>
+
+                                {% elif req.status == 'pending' and req.server_a_status == 'pending' %}
+                                    <!-- 🟡 Step 1: Waiting for Server A to review -->
+                                    <span class="badge bg-warning text-dark">🟡 Waiting for Server A</span>
+
+                                {% elif req.server_a_status == 'approved' and req.server_b_status == 'pending' %}
+                                    <!-- 🔵 Step 2: Server A approved, waiting for Server B -->
+                                    <span class="badge bg-info text-dark">🔵 Waiting for Server B</span>
+
+                                {% elif req.server_b_status == 'approved' and req.status == 'pending' %}
+                                    <!-- 🟣 Step 3: Both servers approved, waiting for file owner -->
+                                    <span class="badge" style="background-color: #8b5cf6;">🟣 Waiting for File Owner</span>
+
+                                {% elif req.status == 'allowed' %}
+                                    <!-- ✅ Fully approved by all 3 parties -->
+                                    <span class="badge bg-success">✅ Approved</span>
+
+                                {% else %}
+                                    {{ req.status }}
+                                {% endif %}
+                            </td>
+
+                            <!-- Download Column — Only show key input when fully approved -->
+                            <td>
+                                {% if req.status == 'allowed' %}
+                                    <form method="POST" action="{{ url_for('download', fid=req.fileid) }}">
+                                        <div class="input-group">
+                                            <input type="text" name="key" placeholder="Enter key from email" class="form-control" required />
+                                            <button type="submit" class="btn btn-success">Download</button>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">No requests found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

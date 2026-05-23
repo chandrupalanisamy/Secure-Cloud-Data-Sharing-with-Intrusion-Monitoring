@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intruders — Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="bi bi-shield-exclamation me-2"></i>Data Security — Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}" class="nav-link text-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Intruders Table -->
+    <div class="container glass-container mt-4">
+        <h1 class="glass-header text-center mb-4">
+            <i class="bi bi-person-slash me-2"></i>Intruders List
+        </h1>
+
+        <!-- Summary badges -->
+        <div class="d-flex gap-3 mb-3 flex-wrap">
+            <span class="badge bg-danger fs-6 px-3 py-2">
+                <i class="bi bi-x-circle me-1"></i>
+                Blocked: {{ data | selectattr('status', 'equalto', 'blocked') | list | length }}
+            </span>
+            <span class="badge bg-success fs-6 px-3 py-2">
+                <i class="bi bi-check-circle me-1"></i>
+                Allowed: {{ data | selectattr('status', 'equalto', 'allowed') | list | length }}
+            </span>
+            <span class="badge bg-secondary fs-6 px-3 py-2">
+                <i class="bi bi-list me-1"></i>
+                Total Records: {{ data | length }}
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-person me-1"></i>Username</th>
+                        <th><i class="bi bi-wifi me-1"></i>IP Address</th>
+                        <th><i class="bi bi-tag me-1"></i>Type</th>
+                        <th><i class="bi bi-calendar me-1"></i>Date</th>
+                        <th><i class="bi bi-shield me-1"></i>Status</th>
+                        <th><i class="bi bi-gear me-1"></i>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data %}
+                        {% for intruder in data %}
+                        <tr>
+                            <td>
+                                <i class="bi bi-person-circle me-1 text-muted"></i>
+                                {{ intruder.uname }}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ intruder.ipaddress }}</span>
+                            </td>
+                            <td>
+                                {% if intruder.filename == 'LOGIN_ATTEMPT' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-door-open me-1"></i>Login
+                                </span>
+                                {% else %}
+                                <span class="badge bg-info text-dark">
+                                    <i class="bi bi-file-earmark-lock me-1"></i>Download Key
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ intruder.date }}</td>
+                            <td>
+                                <span id="status-{{ intruder.uid }}" class="badge 
+                                    {% if intruder.status == 'blocked' %}bg-danger
+                                    {% elif intruder.status == 'allowed' %}bg-success
+                                    {% else %}bg-secondary{% endif %}">
+                                    <i class="bi {% if intruder.status == 'blocked' %}bi-lock-fill{% else %}bi-unlock-fill{% endif %} me-1"></i>
+                                    {{ intruder.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if intruder.status == 'blocked' %}
+                                <button id="btn-{{ intruder.uid }}" class="btn btn-success btn-sm" onclick="unblockUser('{{ intruder.uid }}')">
+                                    <i class="bi bi-unlock me-1"></i>Unblock
+                                </button>
+                                {% else %}
+                                <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi bi-shield-check fs-1 d-block mb-2"></i>
+                                No intruders detected.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function unblockUser(uid) {
+            fetch(`/unblock_ajax/${uid}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update status badge
+                    const statusSpan = document.getElementById(`status-${uid}`);
+                    statusSpan.innerHTML = '<i class="bi bi-unlock-fill me-1"></i>allowed';
+                    statusSpan.className = 'badge bg-success';
+
+                    // Remove unblock button
+                    const btn = document.getElementById(`btn-${uid}`);
+                    if (btn) {
+                        btn.outerHTML = '<span class="text-muted small">—</span>';
+                    }
+                } else {
+                    alert('Failed to unblock user: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Error: ' + err));
+        }
+    </script>
+</body>
+</html>

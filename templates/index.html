@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Security - Welcome</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div id="nav">
+        {% include 'navbar.html' %}
+    </div>
+
+    <div class="container mt-5">
+        <div class="text-center glass-container">
+            <h1 class="mb-4">Welcome to Data Security</h1>
+            <p class="lead">
+                Protecting your sensitive data is our top priority. Our system ensures that your data remains secure 
+                with advanced security measures and robust technology.
+            </p>
+        </div>
+
+        <div class="row mt-5 g-4">
+            <div class="col-md-6">
+                <div class="glass-card h-100 p-5">
+                    <h3 class="glass-header text-center">Key Features of the System</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">🛡️ <strong>Multi-Layered Security:</strong> Combines advanced technologies and proactive measures.</li>
+                        <li class="mb-3">🕵️‍♂️ <strong>Intrusion Detection:</strong> Behavioral analytics monitor unauthorized access attempts.</li>
+                        <li class="mb-3">🔐 <strong>Encryption:</strong> Ensures sensitive information remains secure at all times.</li>
+                        <li class="mb-3">🔑 <strong>Secret Key Authentication:</strong> Only authorized users with the correct key can access files.</li>
+                        <li class="mb-3">🛑 <strong>Intrusion Prevention:</strong> Blocks users after three incorrect key attempts and logs their IP address.</li>
+                        <li>📜 <strong>Activity Logging:</strong> Tracks all download activities along with the date for transparency.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card h-100 p-5">
+                    <h3 class="glass-header text-center">How It Works</h3>
+                    <p class="text-center mb-4">Our system operates seamlessly to protect your data:</p>
+                    <ol>
+                        <li class="mb-3">Users request a secret key from the file owner to access a file.</li>
+                        <li class="mb-3">The system monitors attempts to download files. After three failed attempts with an incorrect key, the user is blocked, and their IP is logged.</li>
+                        <li class="mb-3">Authorized users can decrypt and download files using the provided key.</li>
+                        <li>All download activities are logged for auditing purposes, including the date and user details.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 text-center glass-container">
+            <p class="mb-4">
+                By implementing this system, organizations can effectively prevent data breaches and ensure the confidentiality of sensitive information.
+            </p>
+            <a href="/usersignup" class="btn btn-primary me-3 px-4 py-2">Sign Up</a>
+            <a href="/userlogin" class="btn btn-secondary px-4 py-2">Log In</a>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
